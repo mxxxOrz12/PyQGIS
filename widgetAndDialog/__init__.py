@@ -1,0 +1,1 @@
+from .attributeDialog import AttributeDialog

@@ -4,10 +4,11 @@ from qgis.core import QgsProject, QgsLayerTreeModel, QgsCoordinateReferenceSyste
 from qgis.gui import QgsLayerTreeView, QgsMapCanvas, QgsLayerTreeMapCanvasBridge
 from PyQt5.QtCore import QUrl, QSize, QMimeData, QUrl
 from ui.ui import Ui_MainWindow
-from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QHBoxLayout, QFileDialog, QMessageBox, QStatusBar, QLabel, \
+from ui.Dialog import Ui_Dialog
+from PyQt5.QtWidgets import QMainWindow, QDialog,QVBoxLayout, QHBoxLayout, QFileDialog, QMessageBox, QStatusBar, QLabel, \
     QComboBox
 from qgisUtils import addMapLayer, readVectorFile, readRasterFile, menuProvider
-
+from PyQt5 import QtWidgets
 PROJECT = QgsProject.instance()
 
 
@@ -16,7 +17,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         super(MainWindow, self).__init__()
         self.setupUi(self)
         # 1 修改标题
-        self.setWindowTitle("QGIS自定义界面")
+        self.setWindowTitle("PyQGIS桌面软件 -马骁")
         # 2 初始化图层树
         vl = QVBoxLayout(self.dockWidgetContents_1)
         self.layerTreeView = QgsLayerTreeView(self)
@@ -76,6 +77,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # A 按钮、菜单栏功能
         self.connectFunc()
 
+
+
+
     def connectFunc(self):
 
         # 每次移动鼠标，坐标和比例尺变化
@@ -87,6 +91,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # action
         self.actionOpenRaster.triggered.connect(self.actionOpenRasterTriggered)
         self.actionOpenVector.triggered.connect(self.actionOpenShpTriggered)
+
+        self.actionConnect.triggered.connect(self.openDataBaseDialog)
 
     def showXY(self, point):
         x = point.x()
@@ -147,6 +153,24 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         data_file, ext = QFileDialog.getOpenFileName(self, '打开', '',"ShapeFile(*.shp);;All Files(*);;Other(*.gpkg;*.geojson;*.kml)")
         if data_file:
             self.addVectorLayer(data_file)
+
+    def openDataBaseDialog(self):
+        dialog = QDialog()
+        ui = Ui_Dialog()
+        ui.setupUi(dialog)
+
+        ui.pushButton.clicked.connect(self.testConnection)
+
+        dialog.exec_()
+
+    def testConnection(self):
+        print("Testing database connection...")
+        dialog = self.sender().parent()
+        name = dialog.findChild(QtWidgets.QLineEdit, "lineEdit").text()
+        host = dialog.findChild(QtWidgets.QLineEdit, "lineEdit_2").text()
+        port = dialog.findChild(QtWidgets.QLineEdit, "lineEdit_3").text()
+        database = dialog.findChild(QtWidgets.QLineEdit, "lineEdit_4").text()
+        print(f"Name: {name}, Host: {host}, Port: {port}, Database: {database}")
 
     # 添加栅格图层
     def addRasterLayer(self, rasterFilePath):

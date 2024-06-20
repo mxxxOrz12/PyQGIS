@@ -66,9 +66,17 @@
     <addaction name="actionArea"/>
     <addaction name="actionDistance"/>
    </widget>
+   <widget class="QMenu" name="ConnectDataBase">
+    <property name="title">
+     <string>连接数据库</string>
+    </property>
+    <addaction name="actionConnect"/>
+    <addaction name="actiongu"/>
+   </widget>
    <addaction name="menu"/>
    <addaction name="menu_2"/>
    <addaction name="menu_3"/>
+   <addaction name="ConnectDataBase"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QDockWidget" name="dockWidget_3">
@@ -116,6 +124,16 @@
   <action name="actionDistance">
    <property name="text">
     <string>距离量算</string>
+   </property>
+  </action>
+  <action name="actionConnect">
+   <property name="text">
+    <string>连接</string>
+   </property>
+  </action>
+  <action name="actiongu">
+   <property name="text">
+    <string>关闭</string>
    </property>
   </action>
  </widget>

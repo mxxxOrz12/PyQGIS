@@ -1,18 +1,12 @@
-import os
-import os.path as osp
-from osgeo import gdal
-import traceback
-from shutil import copyfile
+
 from PyQt5 import QtWidgets
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPalette,QColor
+
 from PyQt5.QtWidgets import QMenu, QAction,QFileDialog,QMessageBox,QTableView,QDialog
-from qgis.core import QgsLayerTreeNode, QgsLayerTree, QgsMapLayerType,QgsVectorLayer, QgsProject\
-        ,QgsVectorFileWriter,QgsWkbTypes,Qgis,QgsFillSymbol,QgsSingleSymbolRenderer,QgsVectorLayerCache\
-        ,QgsMapLayer,QgsRasterLayer,QgsLayerTreeGroup,QgsLayerTreeLayer
-from qgis.gui import QgsLayerTreeViewMenuProvider, QgsLayerTreeView, QgsLayerTreeViewDefaultActions, QgsMapCanvas,QgsMessageBar,\
-    QgsAttributeTableModel,QgsAttributeTableView,QgsAttributeTableFilterModel,QgsGui,QgsAttributeDialog,QgsProjectionSelectionDialog,QgsMultiBandColorRendererWidget
+from qgis.core import QgsLayerTreeNode, QgsLayerTree, QgsMapLayerType, QgsProject,QgsMapLayer,QgsRasterLayer,QgsLayerTreeGroup,QgsLayerTreeLayer
+from qgis.gui import QgsLayerTreeViewMenuProvider, QgsLayerTreeView, QgsLayerTreeViewDefaultActions, QgsMapCanvas
+
 import traceback
+from widgetAndDialog import AttributeDialog
 
 PROJECT = QgsProject.instance()
 
@@ -37,7 +31,7 @@ class menuProvider(QgsLayerTreeViewMenuProvider):
                 menu.addAction('折叠所有图层',self.layerTreeView.collapseAllNodes)
                 return menu
 
-            if len(self.layerTreeView.selectedLayers()) >= 1:
+            if len(self.layerTreeView.selectedLayers()) > 1:
                 # 添加组
                 self.actionGroupSelected = self.actions.actionGroupSelected()
                 menu.addAction(self.actionGroupSelected)
@@ -62,16 +56,32 @@ class menuProvider(QgsLayerTreeViewMenuProvider):
                     menu.addAction(self.actionMoveToTop)
                     self.actionZoomToLayer = self.actions.actionZoomToLayer(self.mapCanvas, menu)
                     menu.addAction(self.actionZoomToLayer)
-                    # layer : QgsMapLayer = self.layerTreeView.currentLayer()
-                    # if layer.type() == QgsMapLayerType.RasterLayer:
-                    #     tempWidget = QgsMultiBandColorRendererWidget(layer)
-                    #     tempWidget.show()
-                    #     tempWidget.widgetChanged.connect(lambda : self.updateRasterLayerRenderer(tempWidget,layer))
+
+                    layer: QgsMapLayer = self.layerTreeView.currentLayer()
+
+                    if layer.type() == QgsMapLayerType.VectorLayer:
+                        actionOpenAttributeDialog = QAction('打开属性表', menu)
+                        actionOpenAttributeDialog.triggered.connect(lambda: self.openAttributeDialog(layer))
+                        menu.addAction(actionOpenAttributeDialog)
+
+                    actionOpenLayerProp = QAction('图层属性', menu)
+                    actionOpenLayerProp.triggered.connect(lambda : self.openLayerPropTriggered(layer))
+                    menu.addAction(actionOpenLayerProp)
+
+                    actionDeleteLayer = QAction("删除图层",menu)
+                    actionDeleteLayer.triggered.connect(lambda : self.deleteLayer(layer))
+                    menu.addAction(actionDeleteLayer)
 
                 return menu
 
         except:
             print(traceback.format_exc())
+
+    def openAttributeDialog(self,layer):
+        ad = AttributeDialog(self.mainWindows, layer)
+        ad.show()
+
+
 
     def updateRasterLayerRenderer(self,widget,layer):
         print("change")
